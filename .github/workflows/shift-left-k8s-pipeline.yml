@@ -14,26 +14,11 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set Up Kubernetes Cluster
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubernetes-tools@v2
         with:
-          version: 'v1.24.0'
+          kubectl-version: 'v1.24.0'
 
-      - name: Verify kubectl Installation
-        run: |
-          if ! command -v kubectl &> /dev/null; then
-            echo "kubectl could not be found, installing manually." >&2
-            sudo apt-get update && sudo apt-get install -y kubectl || true
-            if ! command -v kubectl &> /dev/null; then
-              curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
-              chmod +x kubectl
-              sudo mv kubectl /usr/local/bin/kubectl
-            fi
-          fi
-
-      - name: Add kubectl to PATH
-        run: |
-          echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
-          source ~/.bashrc
+                source ~/.bashrc
 
       - name: Verify kubectl Installation
         run: |
