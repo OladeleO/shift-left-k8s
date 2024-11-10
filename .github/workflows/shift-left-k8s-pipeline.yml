@@ -34,12 +34,23 @@ jobs:
           chmod +x ./kubectl
           mv ./kubectl /usr/local/bin/kubectl
 
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Clone Kubernetes Goat Repository
+        run: |
+          git clone https://github.com/madhuakula/kubernetes-goat.git
+
+      - name: List Directory Contents to Confirm Clone
+        run: |
+          ls -al
+
       - name: Deploy Kubernetes Goat Using Manifests
         run: |
           cd kubernetes-goat
           kubectl apply -f scenarios/
           kubectl get pods -A
-
       - name: Verify Deployment
         run: |
           kubectl get services -A
