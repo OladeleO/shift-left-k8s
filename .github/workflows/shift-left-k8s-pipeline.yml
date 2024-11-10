@@ -34,15 +34,10 @@ jobs:
           chmod +x ./kubectl
           mv ./kubectl /usr/local/bin/kubectl
 
-      - name: Install Helm
+      - name: Deploy Kubernetes Goat Using Manifests
         run: |
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-      - name: Deploy Kubernetes Goat
-        run: |
-          git clone https://github.com/madhuakula/kubernetes-goat.git
           cd kubernetes-goat
-          helm install kubernetes-goat ./helm/kubernetes-goat
+          kubectl apply -f scenarios/
           kubectl get pods -A
 
       - name: Verify Deployment
