@@ -58,6 +58,11 @@ jobs:
           cd kubernetes-goat/scenarios/metadata-db
           helm lint .
 
+      - name: Deploy Metadata-db Using Helm
+        run: |
+          cd kubernetes-goat/scenarios/metadata-db
+          helm install metadata-db .
+
       - name: Deploy Kubernetes Goat Using Manifests
         run: |
           cd kubernetes-goat
