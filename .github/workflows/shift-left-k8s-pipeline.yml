@@ -1,0 +1,75 @@
+name: Vulnerable Kubernetes CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set Up Kubernetes Cluster
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.24.0'
+
+      - name: Deploy Kubernetes Goat
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/madhuakula/kubernetes-goat/main/kubernetes-goat.yaml
+
+      - name: Scan YAML Manifests with kube-score (SAST)
+        run: |
+          curl -LO https://github.com/zegl/kube-score/releases/download/v1.11.0/kube-score_1.11.0_linux_amd64.tar.gz
+          tar -xf kube-score_1.11.0_linux_amd64.tar.gz
+          ./kube-score score https://raw.githubusercontent.com/madhuakula/kubernetes-goat/main/kubernetes-goat.yaml > kube-score-report.txt
+        continue-on-error: true
+
+      - name: Scan Container Images with Trivy (SCA)
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy image madhuakula/kubernetes-goat:latest --severity HIGH,CRITICAL --format json --output trivy-report.json
+        continue-on-error: true
+
+      - name: Run Kube-hunter for Security Testing (Penetration Testing)
+        run: |
+          pip install kube-hunter
+          kube-hunter --remote $(kubectl cluster-info | grep 'Kubernetes control plane' | awk '/https/ {print $NF}') --json > kube-hunter-report.json
+        continue-on-error: true
+
+      - name: Run Kube-bench for CIS Benchmark (Compliance)
+        run: |
+          curl -LO https://github.com/aquasecurity/kube-bench/releases/download/v0.6.9/kube-bench_0.6.9_linux_amd64.tar.gz
+          tar -xf kube-bench_0.6.9_linux_amd64.tar.gz
+          ./kube-bench --json > kube-bench-report.json
+        continue-on-error: true
+
+      - name: Monitor Runtime Security with Falco (Runtime Security)
+        run: |
+          curl -s https://dl.bintray.com/falcosecurity/bin/falco-0.29.1-x86_64.deb -o falco.deb
+          sudo dpkg -i falco.deb
+          sudo falco -u | tee falco-output.txt
+        continue-on-error: true
+
+      - name: Use Tetragon for eBPF-based Monitoring (Runtime Security)
+        run: |
+          curl -LO https://github.com/cilium/tetragon/releases/download/v0.6.0/tetragon-v0.6.0-linux-amd64.tar.gz
+          tar -xf tetragon-v0.6.0-linux-amd64.tar.gz
+          sudo ./tetragon > tetragon-output.txt
+        continue-on-error: true
+
+      - name: Upload Reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: security-reports
+          path: |
+            kube-score-report.txt
+            trivy-report.json
+            kube-hunter-report.json
+            kube-bench-report.json
+            falco-output.txt
+            tetragon-output.txt
