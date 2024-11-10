@@ -14,11 +14,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set Up Kubernetes Cluster
-        uses: azure/setup-kubernetes-tools@v2
+        uses: yokawasa/action-setup-kube-tools@v0.11.2
         with:
-          kubectl-version: 'v1.24.0'
-
-                source ~/.bashrc
+          kubectl: '1.25'
 
       - name: Verify kubectl Installation
         run: |
