@@ -18,12 +18,18 @@ jobs:
         with:
           version: 'v1.24.0'
 
-      - name: Deploy Kubernetes Goat
+      - name: Verify kubectl Installation
         run: |
-          git clone https://github.com/madhuakula/kubernetes-goat.git
-          cd kubernetes-goat
-          chmod +x setup-kubernetes-goat.sh
-          bash setup-kubernetes-goat.sh
+          if ! command -v kubectl &> /dev/null; then
+            echo "kubectl could not be found, installing manually." >&2
+            curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
+            chmod +x kubectl
+            sudo mv kubectl /usr/local/bin/kubectl
+          fi
+
+      - name: Add kubectl to PATH
+        run: |
+          export PATH=$PATH:/usr/local/bin/kubectl
 
       - name: Verify kubectl Installation
         run: |
@@ -31,6 +37,13 @@ jobs:
             echo "kubectl could not be found, please ensure it is installed correctly." >&2
             exit 1
           fi
+
+      - name: Deploy Kubernetes Goat
+        run: |
+          git clone https://github.com/madhuakula/kubernetes-goat.git
+          cd kubernetes-goat
+          chmod +x setup-kubernetes-goat.sh
+          bash setup-kubernetes-goat.sh
 
       - name: Scan YAML Manifests with kube-score (SAST)
         run: |
