@@ -66,7 +66,9 @@ jobs:
       - name: Deploy Kubernetes Goat Using Manifests Recursively (Excluding Metadata-db)
         run: |
           cd kubernetes-goat
-          find scenarios/ -type f \( -name '*.yaml' -o -name '*.yml' \) ! -path 'scenarios/metadata-db/*' -exec kubectl apply -f {} +
+          find scenarios/ -type f \( -name '*.yaml' -o -name '*.yml' \) ! -path 'scenarios/metadata-db/*' -print0 | while IFS= read -r -d '' file; do
+            kubectl apply -f "$file"
+          done
           kubectl get pods -A
       
       - name: Verify Deployment
