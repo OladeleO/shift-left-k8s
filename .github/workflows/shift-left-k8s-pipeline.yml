@@ -20,7 +20,10 @@ jobs:
 
       - name: Deploy Kubernetes Goat
         run: |
-          kubectl apply -f https://github.com/madhuakula/kubernetes-goat/blob/master/scenarios/insecure-rbac/setup.yaml
+          git clone https://github.com/madhuakula/kubernetes-goat.git
+          cd kubernetes-goat
+          chmod +x setup-kubernetes-goat.sh
+          bash setup-kubernetes-goat.sh
 
       - name: Scan YAML Manifests with kube-score (SAST)
         run: |
