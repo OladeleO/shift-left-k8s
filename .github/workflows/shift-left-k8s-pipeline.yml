@@ -25,6 +25,13 @@ jobs:
           chmod +x setup-kubernetes-goat.sh
           bash setup-kubernetes-goat.sh
 
+      - name: Verify kubectl Installation
+        run: |
+          if ! command -v kubectl &> /dev/null; then
+            echo "kubectl could not be found, please ensure it is installed correctly." >&2
+            exit 1
+          fi
+
       - name: Scan YAML Manifests with kube-score (SAST)
         run: |
           curl -LO https://github.com/zegl/kube-score/releases/download/v1.11.0/kube-score_1.11.0_linux_amd64.tar.gz
