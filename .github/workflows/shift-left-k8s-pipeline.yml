@@ -52,6 +52,12 @@ jobs:
           helm repo update
           helm install kyverno kyverno/kyverno --namespace kyverno --create-namespace
 
+
+      - name: Validate Helm Templates
+        run: |
+          cd kubernetes-goat/scenarios/metadata-db
+          helm lint .
+
       - name: Deploy Kubernetes Goat Using Manifests
         run: |
           cd kubernetes-goat
