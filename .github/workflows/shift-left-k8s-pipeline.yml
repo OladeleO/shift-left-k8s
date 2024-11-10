@@ -10,41 +10,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      - name: Set Up Kubernetes Cluster
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'v1.24.0'
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
 
-      - name: Verify kubectl Installation
+      - name: Install Kind
         run: |
-          if ! command -v kubectl &> /dev/null; then
-            echo "kubectl could not be found, installing manually." >&2
-            curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
-            chmod +x kubectl
-            sudo mv kubectl /usr/local/bin/kubectl
-          fi
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
+          chmod +x ./kind
+          mv ./kind /usr/local/bin/kind
 
-      - name: Add kubectl to PATH
+      - name: Create Kubernetes Cluster
         run: |
-          export PATH=$PATH:/usr/local/bin/kubectl
+          kind create cluster --name goat-cluster
+          export KUBECONFIG="$(kind get kubeconfig-path --name="goat-cluster")"
+          kubectl get nodes
 
-      - name: Verify kubectl Installation
+      - name: Install kubectl
         run: |
-          if ! command -v kubectl &> /dev/null; then
-            echo "kubectl could not be found, please ensure it is installed correctly." >&2
-            exit 1
-          fi
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          mv ./kubectl /usr/local/bin/kubectl
+
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
       - name: Deploy Kubernetes Goat
         run: |
           git clone https://github.com/madhuakula/kubernetes-goat.git
           cd kubernetes-goat
-          chmod +x setup-kubernetes-goat.sh
-          bash setup-kubernetes-goat.sh
+          helm install kubernetes-goat ./helm/kubernetes-goat
+          kubectl get pods -A
 
+      - name: Verify Deployment
+        run: |
+          kubectl get services -A
+          kubectl get pods -A
+        
       - name: Scan YAML Manifests with kube-score (SAST)
         run: |
           curl -LO https://github.com/zegl/kube-score/releases/download/v1.11.0/kube-score_1.11.0_linux_amd64.tar.gz
