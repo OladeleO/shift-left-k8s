@@ -63,10 +63,10 @@ jobs:
           cd kubernetes-goat/scenarios/metadata-db
           helm install metadata-db .
 
-      - name: Deploy Kubernetes Goat Using Manifests
+      - name: Deploy Kubernetes Goat Using Manifests Recursively (Excluding Metadata-db)
         run: |
           cd kubernetes-goat
-          kubectl apply -R -f scenarios/ --validate=false
+          find scenarios/ -type f \( -name '*.yaml' -o -name '*.yml' \) ! -path 'scenarios/metadata-db/*' -exec kubectl apply -f {} +
           kubectl get pods -A
       
       - name: Verify Deployment
