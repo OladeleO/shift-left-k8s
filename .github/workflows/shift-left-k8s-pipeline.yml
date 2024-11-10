@@ -46,6 +46,10 @@ jobs:
         run: |
           ls -al
 
+      - name: Install Kyverno CRDs
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/kyverno/kyverno/main/config/install.yaml
+
       - name: Deploy Kubernetes Goat Using Manifests
         run: |
           cd kubernetes-goat
