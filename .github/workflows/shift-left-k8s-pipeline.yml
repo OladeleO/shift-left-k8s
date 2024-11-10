@@ -49,7 +49,7 @@ jobs:
       - name: Deploy Kubernetes Goat Using Manifests
         run: |
           cd kubernetes-goat
-          kubectl apply -f scenarios/*.yaml
+          kubectl apply -f -R scenarios/
           kubectl get pods -A
       - name: Verify Deployment
         run: |
