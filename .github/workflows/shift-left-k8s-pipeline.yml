@@ -96,9 +96,15 @@ jobs:
         run: |
           trivy fs --severity HIGH,CRITICAL --format json --output trivy-report.json . 
         
-      - name: Monitor Runtime Security with Falco
+      - name: Run Falco for Runtime Security Monitoring
         run: |
-            docker run --rm --privileged falcosecurity/falco:latest
+          docker run --rm --privileged \
+            -v /var/run/docker.sock:/host/var/run/docker.sock \
+            -v /proc:/host/proc:ro \
+            -v /boot:/host/boot:ro \
+            -v /lib/modules:/host/lib/modules:ro \
+            -v /usr:/host/usr:ro \
+            falcosecurity/falco:latest
 
       - name: Use Tetragon for eBPF-based Monitoring
         run: |
