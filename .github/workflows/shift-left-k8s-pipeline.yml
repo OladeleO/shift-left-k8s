@@ -87,13 +87,11 @@ jobs:
           done
         shell: bash
   
-      - name: Install Trivy
+      - name: Build Kubernetes Goat Image
         run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-    
-      - name: Pull Kubernetes Goat Image
-        run: |
-          docker pull madhuakula/kubernetes-goat:latest
+          git clone https://github.com/madhuakula/kubernetes-goat.git
+          cd kubernetes-goat
+          docker build -t madhuakula/kubernetes-goat:latest .
   
       - name: Run Trivy Scan
         run: |
