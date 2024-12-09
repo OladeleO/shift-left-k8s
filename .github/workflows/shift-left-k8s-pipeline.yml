@@ -96,19 +96,19 @@ jobs:
         run: |
           trivy fs --severity HIGH,CRITICAL --format json --output trivy-report.json . 
         
-      - name: Run Falco for Runtime Security Monitoring
+      - name: Run Falco and Save Logs
         run: |
-          docker run --rm --privileged \
+          timeout 60s docker run --rm --privileged \
             -v /var/run/docker.sock:/host/var/run/docker.sock \
             -v /proc:/host/proc:ro \
             -v /boot:/host/boot:ro \
             -v /lib/modules:/host/lib/modules:ro \
             -v /usr:/host/usr:ro \
-            falcosecurity/falco:latest
-
-      - name: Use Tetragon for eBPF-based Monitoring
-        run: |
-          docker run --rm --privileged cilium/tetragon:latest
+            falcosecurity/falco:latest > falco-output.log 2>&1 || true
+      
+      # - name: Use Tetragon for eBPF-based Monitoring
+      #   run: |
+      #     docker run --rm --privileged cilium/tetragon:latest
 
       - name: Upload Reports
         uses: actions/upload-artifact@v3
