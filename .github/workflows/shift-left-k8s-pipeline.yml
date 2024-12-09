@@ -87,13 +87,16 @@ jobs:
           done
         shell: bash
   
-      - name: Scan Container Images with Trivy (SCA)
+      - name: Install Trivy
         run: |
-            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/trivy-cache:/root/.cache/ aquasecurity/trivy:latest image madhuakula/kubernetes-goat:latest --severity HIGH,CRITICAL --format json --output trivy-report.json
-  
-      - name: Run Kube-bench for CIS Benchmark
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+      
+      - name: Run Trivy Scan
         run: |
-          docker run --rm -v $(pwd)/cfg:/cfg aquasecurity/kube-bench:latest --json > kube-bench-report.json
+          trivy image madhuakula/kubernetes-goat:latest --severity HIGH,CRITICAL --format json --output trivy-report.json
+            - name: Run Kube-bench for CIS Benchmark
+              run: |
+                docker run --rm -v $(pwd)/cfg:/cfg aquasecurity/kube-bench:latest --json > kube-bench-report.json
 
       - name: Monitor Runtime Security with Falco
         run: |
