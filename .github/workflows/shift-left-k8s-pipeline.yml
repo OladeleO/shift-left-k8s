@@ -9,6 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+#test
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
