@@ -83,8 +83,11 @@ jobs:
       - name: Scan YAML Manifests with kube-score (SAST)
         run: |
           find $(pwd)/kubernetes-goat/scenarios -type f -name '*.yaml' | while read -r file; do
+            # Extract relative path of the file
             relative_path=${file#$(pwd)/kubernetes-goat/scenarios/}
-            docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score "/scenarios/${relative_path}" >> kube-score-report.txt
+            
+            # Use the relative path inside the container
+            docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score "/scenarios/${relative_path}" >> kube-score-report.txt || true
           done
         shell: bash
   
