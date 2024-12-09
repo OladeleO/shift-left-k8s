@@ -95,10 +95,6 @@ jobs:
       - name: Run Trivy Scan
         run: |
           trivy fs --severity HIGH,CRITICAL --format json --output trivy-report.json . 
-  
-      - name: Run Trivy Scan
-        run: |
-          trivy image madhuakula/kubernetes-goat:latest --severity HIGH,CRITICAL --format json --output trivy-report.json
         
       - name: Monitor Runtime Security with Falco
         run: |
