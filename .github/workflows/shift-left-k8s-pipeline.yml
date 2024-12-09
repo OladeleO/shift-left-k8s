@@ -111,10 +111,11 @@ jobs:
       #     docker run --rm --privileged cilium/tetragon:latest
 
       - name: Upload Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: security-reports
           path: |
-            kube-score-report.txt
             trivy-report.json
+            falco-output.log
             kube-bench-report.json
+            kube-score-report.txt
