@@ -78,36 +78,25 @@ jobs:
           kubectl get services -A
           kubectl get pods -A
         
-      - name: Scan YAML Manifests with kube-score (SAST)
+     - name: Scan YAML Manifests with kube-score (SAST)
         run: |
-          docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:1.11.0 score /scenarios/*.yaml > kube-score-report.txt
-        continue-on-error: true
+          docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score /scenarios/*.yaml > kube-score-report.txt
 
       - name: Scan Container Images with Trivy (SCA)
         run: |
-          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/trivy-cache:/root/.cache/ aquasecurity/trivy:0.57.0 image madhuakula/kubernetes-goat:latest --severity HIGH,CRITICAL --format json --output trivy-report.json
-        continue-on-error: true
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/trivy-cache:/root/.cache/ aquasecurity/trivy:latest image madhuakula/kubernetes-goat:latest --severity HIGH,CRITICAL --format json --output trivy-report.json
 
-      - name: Run Kube-hunter for Security Testing (Penetration Testing)
+      - name: Run Kube-bench for CIS Benchmark
         run: |
-          pip install kube-hunter
-          kube-hunter --remote $(kubectl cluster-info | grep 'Kubernetes control plane' | awk '/https/ {print $NF}') --report json > kube-hunter-report.json
-        continue-on-error: true
+          docker run --rm -v $(pwd)/cfg:/cfg aquasecurity/kube-bench:latest --json > kube-bench-report.json
 
-      - name: Run Kube-bench for CIS Benchmark (Compliance)
+      - name: Monitor Runtime Security with Falco
         run: |
-          docker run --rm -v $(pwd)/cfg:/cfg aquasecurity/kube-bench:0.6.9 --json > kube-bench-report.json
-        continue-on-error: true
+          docker run --rm --privileged falcosecurity/falco:latest
 
-      - name: Monitor Runtime Security with Falco (Runtime Security)
+      - name: Use Tetragon for eBPF-based Monitoring
         run: |
-          docker run --rm -it --privileged falcosecurity/falco:latest
-        continue-on-error: true
-
-      - name: Use Tetragon for eBPF-based Monitoring (Runtime Security)
-        run: |
-          docker run --rm --privileged cilium/tetragon:0.6.0
-        continue-on-error: true
+          docker run --rm --privileged cilium/tetragon:latest
 
       - name: Upload Reports
         uses: actions/upload-artifact@v3
@@ -116,7 +105,4 @@ jobs:
           path: |
             kube-score-report.txt
             trivy-report.json
-            kube-hunter-report.json
             kube-bench-report.json
-            falco-output.txt
-            tetragon-output.txt
