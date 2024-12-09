@@ -78,7 +78,7 @@ jobs:
 
       - name: Debug Directory Listing
         run: |
-          ls -al $(pwd)/kubernetes-goat/scenarios
+          ls -al -R $(pwd)/kubernetes-goat/scenarios
         
       - name: Scan YAML Manifests with kube-score (SAST)
         run: |
