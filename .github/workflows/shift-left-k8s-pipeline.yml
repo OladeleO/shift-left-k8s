@@ -82,9 +82,8 @@ jobs:
         
       - name: Scan YAML Manifests with kube-score (SAST)
         run: |
-          for file in $(find kubernetes-goat/scenarios -name '*.yaml'); do
-            docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score /scenarios/$(basename $file) >> kube-score-report.txt
-          done
+          docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score /scenarios > kube-score-report.txt
+        shell: bash
   
       - name: Scan Container Images with Trivy (SCA)
         run: |
