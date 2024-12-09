@@ -90,14 +90,18 @@ jobs:
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-
+    
+      - name: Pull Kubernetes Goat Image
+        run: |
+          docker pull madhuakula/kubernetes-goat:latest
+  
       - name: Run Trivy Scan
         run: |
           trivy image madhuakula/kubernetes-goat:latest --severity HIGH,CRITICAL --format json --output trivy-report.json
-
+        
       - name: Monitor Runtime Security with Falco
         run: |
-          docker run --rm --privileged falcosecurity/falco:latest
+            docker run --rm --privileged falcosecurity/falco:latest
 
       - name: Use Tetragon for eBPF-based Monitoring
         run: |
