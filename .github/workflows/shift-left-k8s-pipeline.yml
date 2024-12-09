@@ -86,12 +86,15 @@ jobs:
             docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score "/scenarios/$(basename "$file")" || echo "Skipping invalid file: $file"
           done
         shell: bash
-  
-      - name: Build Kubernetes Goat Image
+
+
+      - name: Install Trivy
         run: |
-          git clone https://github.com/madhuakula/kubernetes-goat.git
-          cd kubernetes-goat
-          docker build -t madhuakula/kubernetes-goat:latest .
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+      
+      - name: Run Trivy Scan
+        run: |
+          trivy fs --severity HIGH,CRITICAL --format json --output trivy-report.json . 
   
       - name: Run Trivy Scan
         run: |
