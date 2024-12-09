@@ -75,6 +75,10 @@ jobs:
         run: |
           kubectl get services -A
           kubectl get pods -A
+
+      - name: Debug Directory Listing
+        run: |
+          ls -al $(pwd)/kubernetes-goat/scenarios
         
       - name: Scan YAML Manifests with kube-score (SAST)
         run: |
