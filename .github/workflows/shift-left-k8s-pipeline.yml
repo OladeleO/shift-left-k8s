@@ -83,7 +83,8 @@ jobs:
       - name: Scan YAML Manifests with kube-score (SAST)
         run: |
           find $(pwd)/kubernetes-goat/scenarios -type f -name '*.yaml' | while read -r file; do
-            docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score "/scenarios/$(basename "$file")" || echo "Skipping invalid file: $file"
+            relative_path=$(realpath --relative-to=$(pwd)/kubernetes-goat/scenarios "$file")
+            docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score "/scenarios/$relative_path" || echo "Skipping invalid file: $file"
           done > kube-score-report.txt
         shell: bash
 
