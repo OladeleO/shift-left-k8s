@@ -119,6 +119,5 @@ jobs:
           name: security-reports
           path: |
             trivy-report.json
-            falco-output.log
-            kube-bench-report.json
+            falco-summary.log
             kube-score-report.txt
