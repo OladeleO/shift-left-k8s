@@ -84,12 +84,13 @@ jobs:
         run: |
           find $(pwd)/kubernetes-goat/scenarios -type f -name '*.yaml' | while read -r file; do
             docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score "/scenarios/$(basename "$file")" || echo "Skipping invalid file: $file"
-          done
+          done > kube-score-report.txt
         shell: bash
 
       - name: Run kube-bench for CIS Benchmark
         run: |
           docker run --rm --privileged \
+            --security-opt apparmor=unconfined \
             -v $(pwd):/host \
             -v /etc:/etc:ro \
             -v /var/lib:/var/lib:ro \
