@@ -100,6 +100,12 @@ jobs:
           mkdir -p /tmp/kube-bench-config
           cp -r cfg /tmp/kube-bench-config/
           echo "
+          targets:
+            master:
+              - controlplane
+              - etcd
+            node:
+              - node
           target_mapping:
             master: controlplane
             node: node
@@ -114,7 +120,6 @@ jobs:
       - name: Run kube-bench
         run: |
           kube-bench --config-dir /tmp/kube-bench-config/cfg/cis-1.23 --benchmark cis-1.23
-
       - name: Scan YAML Manifests with kube-score
         run: |
           find $(pwd)/kubernetes-goat/scenarios -type f -name '*.yaml' | while read -r file; do
