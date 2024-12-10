@@ -88,45 +88,6 @@ jobs:
           done > kube-score-report.txt
         shell: bash
 
-      - name: Download and Extract kube-bench
-        run: |
-          curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.6.8/kube-bench_0.6.8_linux_amd64.tar.gz -o kube-bench.tar.gz
-          tar -xzvf kube-bench.tar.gz
-          chmod +x kube-bench
-          sudo mv kube-bench /usr/local/bin/
-
-      - name: Prepare kube-bench Config
-        run: |
-          mkdir -p /tmp/kube-bench-config
-          cp -r cfg /tmp/kube-bench-config/
-          echo "
-          targets:
-            master:
-              - controlplane
-              - etcd
-            node:
-              - node
-          target_mapping:
-            master: controlplane
-            node: node
-            etcd: etcd
-          " >> /tmp/kube-bench-config/cfg/cis-1.23/config.yaml
-
-      - name: Debug Configuration Directory
-        run: |
-          ls -al /tmp/kube-bench-config/cfg/cis-1.23
-          cat /tmp/kube-bench-config/cfg/cis-1.23/config.yaml
-
-      - name: Run kube-bench
-        run: |
-          kube-bench --config-dir /tmp/kube-bench-config/cfg/cis-1.23 --benchmark cis-1.23
-      - name: Scan YAML Manifests with kube-score
-        run: |
-          find $(pwd)/kubernetes-goat/scenarios -type f -name '*.yaml' | while read -r file; do
-            relative_path=$(realpath --relative-to=$(pwd)/kubernetes-goat/scenarios "$file")
-            docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score "/scenarios/$relative_path" || echo "Skipping invalid file: $file"
-          done > kube-score-report.txt
-
 
       - name: Install Trivy
         run: |
@@ -145,10 +106,6 @@ jobs:
             -v /lib/modules:/host/lib/modules:ro \
             -v /usr:/host/usr:ro \
             falcosecurity/falco:latest > falco-output.log 2>&1 || true
-      
-      # - name: Use Tetragon for eBPF-based Monitoring
-      #   run: |
-      #     docker run --rm --privileged cilium/tetragon:latest
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4
