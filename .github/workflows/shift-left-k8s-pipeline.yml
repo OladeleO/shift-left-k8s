@@ -99,13 +99,19 @@ jobs:
         
       - name: Run Falco and Save Logs
         run: |
-          timeout 60s docker run --rm --privileged \
+          timeout 120s docker run --rm --privileged \
             -v /var/run/docker.sock:/host/var/run/docker.sock \
             -v /proc:/host/proc:ro \
             -v /boot:/host/boot:ro \
             -v /lib/modules:/host/lib/modules:ro \
             -v /usr:/host/usr:ro \
-            falcosecurity/falco:latest > falco-output.log 2>&1 || true
+            falcosecurity/falco:latest > raw-falco-output.log 2>&1 || true
+
+          # Extract only critical events with a cleaner format
+          grep "Critical" raw-falco-output.log | awk -F': ' '{print "{\"timestamp\":\""$1"\",\"severity\":\"Critical\",\"description\":\""$2"\"}"}' > falco-output.json
+
+          # Optionally output a summary for quick debugging
+          grep "Critical" raw-falco-output.log > falco-summary.log
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4
