@@ -97,7 +97,9 @@ jobs:
 
       - name: Run kube-bench
         run: |
-          kube-bench --config-dir /etc/kubernetes/ --benchmark cis-1.23
+          mkdir -p /tmp/kube-bench-config
+          cp -r cfg /tmp/kube-bench-config/
+          kube-bench --config-dir /tmp/kube-bench-config/cfg/cis-1.23 --benchmark cis-1.23
 
       - name: Scan YAML Manifests with kube-score
         run: |
