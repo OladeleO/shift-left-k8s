@@ -100,16 +100,13 @@ jobs:
             -v /boot:/boot:ro \
             -v /lib/modules:/lib/modules:ro \
             aquasec/kube-bench:latest node > kube-bench-report.json
-        shell: bash
 
-      - name: Scan YAML Manifests with kube-score (SAST)
+      - name: Scan YAML Manifests with kube-score
         run: |
-          mkdir -p kube-score-reports
           find $(pwd)/kubernetes-goat/scenarios -type f -name '*.yaml' | while read -r file; do
-            base_name=$(basename "$file")
-            docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score "/scenarios/$base_name" > "kube-score-reports/${base_name%.yaml}-score.txt" || echo "Skipping invalid file: $file"
-          done
-        shell: bash
+            relative_path=$(realpath --relative-to=$(pwd)/kubernetes-goat/scenarios "$file")
+            docker run --rm -v $(pwd)/kubernetes-goat/scenarios:/scenarios zegl/kube-score:latest score "/scenarios/$relative_path" || echo "Skipping invalid file: $file"
+          done > kube-score-report.txt
 
 
       - name: Install Trivy
