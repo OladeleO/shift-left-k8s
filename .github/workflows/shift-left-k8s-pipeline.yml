@@ -88,18 +88,16 @@ jobs:
           done > kube-score-report.txt
         shell: bash
 
-      - name: Run kube-bench for CIS Benchmark
+      - name: Install kube-bench
         run: |
-          docker run --rm --privileged \
-            --security-opt apparmor=unconfined \
-            -v $(pwd):/host \
-            -v /etc:/etc:ro \
-            -v /var/lib:/var/lib:ro \
-            -v /usr:/usr:ro \
-            -v /proc:/proc:ro \
-            -v /boot:/boot:ro \
-            -v /lib/modules:/lib/modules:ro \
-            aquasec/kube-bench:latest node > kube-bench-report.json
+          curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.6.8/kube-bench_0.6.8_linux_amd64.tar.gz -o kube-bench.tar.gz
+          tar -xzvf kube-bench.tar.gz
+          chmod +x kube-bench
+          sudo mv kube-bench /usr/local/bin/
+
+      - name: Run kube-bench
+        run: |
+          kube-bench --config-dir /etc/kubernetes/ --benchmark cis-1.23
 
       - name: Scan YAML Manifests with kube-score
         run: |
