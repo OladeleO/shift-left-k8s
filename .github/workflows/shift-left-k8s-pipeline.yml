@@ -90,15 +90,14 @@ jobs:
       - name: Run kube-bench for CIS Benchmark
         run: |
           docker run --rm --privileged \
-            -v /var/lib:/var/lib:ro \
-            -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            -v $(pwd):/host \
             -v /etc:/etc:ro \
-            -v /usr/bin:/host/usr/bin:ro \
-            -v /usr/lib:/host/usr/lib:ro \
-            -v /proc:/host/proc:ro \
-            -v /boot:/host/boot:ro \
-            -v /lib/modules:/host/lib/modules:ro \
-            aquasec/kube-bench:latest > kube-bench-report.json 2>&1 || true
+            -v /var/lib:/var/lib:ro \
+            -v /usr:/usr:ro \
+            -v /proc:/proc:ro \
+            -v /boot:/boot:ro \
+            -v /lib/modules:/lib/modules:ro \
+            aquasec/kube-bench:latest node > kube-bench-report.json
         shell: bash
 
       - name: Scan YAML Manifests with kube-score (SAST)
