@@ -97,8 +97,9 @@ jobs:
         run: |
           trivy fs --severity HIGH,CRITICAL --format json --output trivy-report.json . 
         
-      - name: Run Falco and Save Logs
+      - name: Run Falco and Process Logs
         run: |
+          # Run Falco container for 120 seconds and capture output
           timeout 120s docker run --rm --privileged \
             -v /var/run/docker.sock:/host/var/run/docker.sock \
             -v /proc:/host/proc:ro \
@@ -106,12 +107,29 @@ jobs:
             -v /lib/modules:/host/lib/modules:ro \
             -v /usr:/host/usr:ro \
             falcosecurity/falco:latest > raw-falco-output.log 2>&1 || true
-
-          # Extract only critical events with a cleaner format
-          grep "Critical" raw-falco-output.log | awk -F': ' '{print "{\"timestamp\":\""$1"\",\"severity\":\"Critical\",\"description\":\""$2"\"}"}' > falco-output.json
-
-          # Optionally output a summary for quick debugging
+      
+          # Ensure the raw output log exists
+          if [[ ! -f "raw-falco-output.log" ]]; then
+            echo "Error: raw-falco-output.log not found!"
+            exit 1
+          fi
+      
+          # Extract only critical events and save in JSON format
+          awk '/Critical/ {
+            split($0, parts, ": ");
+            timestamp=parts[1];
+            description=parts[2];
+            printf("{\"timestamp\":\"%s\",\"severity\":\"Critical\",\"description\":\"%s\"}\n", timestamp, description);
+          }' raw-falco-output.log > falco-output.json
+      
+          # Optionally generate a human-readable summary for quick debugging
           grep "Critical" raw-falco-output.log > falco-summary.log
+      
+          # Output file locations for visibility
+          echo "Falco logs processed:"
+          echo "Raw Logs: raw-falco-output.log"
+          echo "Critical Events JSON: falco-output.json"
+          echo "Critical Events Summary: falco-summary.log"
 
       - name: Upload Reports
         uses: actions/upload-artifact@v4
