@@ -64,8 +64,7 @@ The pipeline addresses the following categories in the Kubernetes Threat Matrix:
 ### Prerequisites
 
 - A GitHub account with access to Actions.
-- Docker installed locally.
-- Basic understanding of Kubernetes and GitHub Actions.
+- Understanding of Kubernetes and GitHub Actions.
 
 ### Running the Pipeline
 
