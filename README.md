@@ -68,7 +68,26 @@ The pipeline addresses the following categories in the Kubernetes Threat Matrix:
 
 ### Running the Pipeline
 
-1. Clone this repository:
-   ```bash
-   git clone <your-repo-url>
-   cd <your-repo-directory>
+Running the Pipeline
+
+Option 1: Triggering via GitHub Actions UI
+
+	1.	Navigate to your repository on GitHub.
+	2.	Click on the Actions tab in the repository.
+	3.	Find the workflow titled Vulnerable Kubernetes CI/CD Pipeline. If it was pushed to the main branch, it should appear in the list of workflows.
+	4.	To manually trigger the workflow:
+	•	If your workflow includes a workflow_dispatch event, you’ll see a Run workflow button on the workflow page.
+	•	Select the desired branch (e.g., main) and click Run workflow.
+	5.	Monitor the workflow execution in real-time as the pipeline steps are executed.
+	6.	Once the workflow completes, download the generated artifacts (e.g., security reports) by clicking the respective workflow run and navigating to the Artifacts section.
+
+Viewing Results
+
+	•	Navigate to the Artifacts section of the workflow run to download reports like:
+	•	kube-score-report.txt
+	•	trivy-report.json
+	•	falco-summary.log
+	•	falco-output.json
+	•	Analyze these reports to understand the findings and insights for securing Kubernetes environments.
+
+By providing steps for both GitHub Actions UI and terminal, the guide accommodates different preferences for running the pipeline.
